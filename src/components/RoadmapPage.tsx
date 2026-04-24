@@ -262,15 +262,17 @@ export default function RoadmapPage({ onNavigate }: RoadmapPageProps) {
                 {/* Card */}
                 <div className={`flex-1 ${stage.bgColor} border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden`}>
                   {/* Card header */}
-                  <div className={`${stage.accentColor} border-b-4 border-black px-4 sm:px-6 py-3 flex flex-wrap items-center gap-3`}>
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      {stage.icon}
-                      <div>
-                        <div className="font-black uppercase text-base sm:text-lg leading-none">{stage.title}</div>
+                  <div className={`${stage.accentColor} border-b-4 border-black px-4 sm:px-6 py-3 flex flex-col gap-2`}>
+                    {/* Title row */}
+                    <div className="flex items-start gap-2">
+                      <div className="shrink-0 mt-0.5">{stage.icon}</div>
+                      <div className="min-w-0">
+                        <div className="font-black uppercase text-base sm:text-lg leading-tight">{stage.title}</div>
                         <div className="font-bold text-xs sm:text-sm text-black/70">{stage.subtitle}</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    {/* Badges row — always on its own line */}
+                    <div className="flex items-center gap-2">
                       <span className={`${stage.levelColor} text-white border-2 border-black px-2 py-0.5 rounded-lg font-black text-xs uppercase`}>
                         {stage.level}
                       </span>
