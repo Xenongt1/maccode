@@ -1,7 +1,96 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import StepPlayer, { CipherStep } from './StepPlayer';
 
 interface Props { activeTab: 'learn' | 'play' }
+
+const H_BITS = '01001000'.split('');
+const I_BITS = '01001001'.split('');
+const A_BITS = '01000001'.split('');
+const B_BITS = '01000010'.split('');
+const HA_BITS = H_BITS.map((b, i) => String(parseInt(b) ^ parseInt(A_BITS[i])));
+const IB_BITS = I_BITS.map((b, i) => String(parseInt(b) ^ parseInt(B_BITS[i])));
+
+function BitRow({ bits, color, label }: { bits: string[]; color: string; label: string }) {
+  return (
+    <div className="flex items-center gap-1">
+      <span className="w-20 font-black text-xs text-black/70 text-right pr-1">{label}</span>
+      {bits.map((b, i) => (
+        <span key={i} className={`w-6 h-6 flex items-center justify-center border-2 border-black rounded font-black text-xs ${color}`}>{b}</span>
+      ))}
+    </div>
+  );
+}
+
+const XOR_STEPS: CipherStep[] = [
+  {
+    title: 'Plaintext Bits',
+    visual: (
+      <div className="space-y-2 w-full">
+        <BitRow bits={H_BITS} color="bg-cyan-200" label="H (72)" />
+        <BitRow bits={I_BITS} color="bg-cyan-200" label="I (73)" />
+      </div>
+    ),
+    explanation: "Each character is 8 bits. 'H' = 72 and 'I' = 73 in ASCII. Every character you type is stored this way in a computer.",
+  },
+  {
+    title: 'Key Bits',
+    visual: (
+      <div className="space-y-2 w-full">
+        <BitRow bits={A_BITS} color="bg-pink-200" label="A (65)" />
+        <BitRow bits={B_BITS} color="bg-pink-200" label="B (66)" />
+      </div>
+    ),
+    explanation: "The key 'AB' is also converted to bits. A=65, B=66. The key repeats cyclically to match the message length.",
+  },
+  {
+    title: 'XOR Each Bit',
+    visual: (
+      <div className="space-y-2 w-full">
+        <BitRow bits={H_BITS} color="bg-cyan-200" label="H" />
+        <div className="flex items-center gap-1 pl-[84px]">
+          {Array(8).fill('⊕').map((s, i) => <span key={i} className="w-6 text-center font-black text-sm text-black/40">{s}</span>)}
+        </div>
+        <BitRow bits={A_BITS} color="bg-pink-200" label="A" />
+        <div className="flex items-center gap-1 pl-[84px]">
+          {Array(8).fill('=').map((s, i) => <span key={i} className="w-6 text-center font-black text-sm text-black/40">{s}</span>)}
+        </div>
+        <BitRow bits={HA_BITS} color="bg-yellow-300" label="H⊕A" />
+      </div>
+    ),
+    explanation: "XOR outputs 1 only when the two bits differ. The result byte looks like garbage — meaningless without the key.",
+  },
+  {
+    title: 'Ciphertext',
+    visual: (
+      <div className="flex gap-4 items-center flex-wrap justify-center">
+        <div className="bg-black text-green-300 border-4 border-black font-mono font-black text-sm px-4 py-3 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          H ⊕ A = chr({parseInt(HA_BITS.join(''), 2)})
+        </div>
+        <div className="bg-black text-green-300 border-4 border-black font-mono font-black text-sm px-4 py-3 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          I ⊕ B = chr({parseInt(IB_BITS.join(''), 2)})
+        </div>
+        <div className="w-full text-center text-xs font-bold text-black/50 mt-1">↓ transmitted over the network</div>
+      </div>
+    ),
+    explanation: "The ciphertext bytes are unreadable. An eavesdropper intercepting the bytes has no idea what the original text was.",
+  },
+  {
+    title: 'Decrypt (XOR Again)',
+    visual: (
+      <div className="flex gap-4 items-center flex-wrap justify-center">
+        <div className="text-center">
+          <div className="text-xs font-bold mb-1">Ciphertext ⊕ Key</div>
+          <div className="bg-yellow-100 border-4 border-black font-mono font-black text-sm px-4 py-3 rounded-xl">chr({parseInt(HA_BITS.join(''), 2)}) ⊕ A</div>
+        </div>
+        <div className="font-black text-2xl">=</div>
+        <div className="bg-green-300 border-4 border-black font-black text-3xl px-5 py-3 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">H</div>
+        <div className="bg-green-300 border-4 border-black font-black text-3xl px-5 py-3 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">I</div>
+      </div>
+    ),
+    explanation: "XOR is its own inverse: applying the same key again perfectly recovers the original plaintext. Encryption = decryption.",
+  },
+];
 
 function xorStrings(a: string, b: string): string {
   const result: string[] = [];
@@ -22,6 +111,7 @@ function toHex(s: string): string {
 export function XORLearn() {
   return (
     <div className="space-y-6">
+      <StepPlayer steps={XOR_STEPS} accentColor="bg-green-300" />
       <div className="bg-green-300 border-4 border-black p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl">
         <h3 className="text-xl font-black uppercase mb-2">XOR Stream Cipher</h3>
         <p className="font-bold text-sm leading-relaxed">

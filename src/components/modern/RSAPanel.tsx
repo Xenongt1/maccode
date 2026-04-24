@@ -1,5 +1,88 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import StepPlayer, { CipherStep } from './StepPlayer';
+
+function Pill({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div className={`${color} border-4 border-black px-5 py-3 rounded-2xl text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}>
+      <div className="text-xs font-black uppercase text-black/60">{label}</div>
+      <div className="font-black text-2xl">{value}</div>
+    </div>
+  );
+}
+
+const RSA_STEPS: CipherStep[] = [
+  {
+    title: 'Choose Primes',
+    visual: (
+      <div className="flex items-center gap-4">
+        <Pill label="Prime p" value="5" color="bg-cyan-300" />
+        <div className="font-black text-3xl">×</div>
+        <Pill label="Prime q" value="11" color="bg-pink-300" />
+      </div>
+    ),
+    explanation: "Pick two prime numbers. In real RSA-2048 these are each 1024 bits (~300 digits). We use p=5 and q=11 to see the math clearly.",
+  },
+  {
+    title: 'Compute Modulus',
+    visual: (
+      <div className="space-y-3 w-full max-w-xs mx-auto">
+        <div className="flex items-center gap-2 justify-center">
+          <div className="bg-cyan-200 border-2 border-black px-3 py-2 rounded-xl font-black text-sm">p=5</div>
+          <span className="font-black">×</span>
+          <div className="bg-pink-200 border-2 border-black px-3 py-2 rounded-xl font-black text-sm">q=11</div>
+          <span className="font-black">=</span>
+          <Pill label="n (public)" value="55" color="bg-yellow-300" />
+        </div>
+        <div className="bg-white border-2 border-black px-3 py-2 rounded-xl font-mono text-sm font-bold text-center">
+          φ(n) = (5−1)(11−1) = 4 × 10 = <strong>40</strong>
+        </div>
+        <div className="text-xs font-bold text-black/50 text-center">φ(n) is kept secret</div>
+      </div>
+    ),
+    explanation: "The modulus n=55 is public. Euler's totient φ(n)=40 counts integers coprime to n — this is kept secret and is the core of RSA's security.",
+  },
+  {
+    title: 'Public Exponent e',
+    visual: (
+      <div className="flex flex-col items-center gap-3">
+        <Pill label="e (public)" value="3" color="bg-green-200" />
+        <div className="bg-white border-2 border-black px-3 py-2 rounded-xl font-mono text-sm font-bold">gcd(3, 40) = 1 ✓</div>
+        <div className="bg-cyan-300 border-2 border-black px-4 py-2 rounded-xl font-black text-xs">Public key: (e=3, n=55)</div>
+      </div>
+    ),
+    explanation: "e=3 must be coprime with φ(n)=40. Together (e, n) = (3, 55) is the public key — anyone can encrypt with this.",
+  },
+  {
+    title: 'Private Exponent d',
+    visual: (
+      <div className="flex flex-col items-center gap-3">
+        <div className="bg-white border-2 border-black px-3 py-2 rounded-xl font-mono text-sm font-bold">d × 3 ≡ 1 (mod 40)</div>
+        <Pill label="d (secret)" value="27" color="bg-pink-300" />
+        <div className="bg-white border-2 border-black px-3 py-2 rounded-xl font-mono text-xs font-bold">27 × 3 = 81 = 2×40 + 1 ✓</div>
+        <div className="bg-pink-300 border-2 border-black px-4 py-2 rounded-xl font-black text-xs">Private key: (d=27, n=55)</div>
+      </div>
+    ),
+    explanation: "The private exponent d=27 is the modular inverse of e mod φ(n). Only the key owner knows this — recovering d from (e, n) requires factoring n.",
+  },
+  {
+    title: 'Encrypt & Decrypt',
+    visual: (
+      <div className="space-y-3 w-full max-w-sm mx-auto">
+        <div className="bg-cyan-200 border-4 border-black px-4 py-3 rounded-xl font-mono font-black text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          Encrypt: M=2, C = 2³ mod 55 = <strong>8</strong>
+        </div>
+        <div className="bg-pink-200 border-4 border-black px-4 py-3 rounded-xl font-mono font-black text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          Decrypt: C=8, M = 8²⁷ mod 55 = <strong>2</strong>
+        </div>
+        <div className="bg-green-300 border-4 border-black px-4 py-2 rounded-xl font-black text-sm text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          ✓ Recovered M = 2
+        </div>
+      </div>
+    ),
+    explanation: "Encrypt with public key: C = Mᵉ mod n. Decrypt with private key: M = Cᵈ mod n. Breaking RSA requires factoring n — infeasible for large keys.",
+  },
+];
 
 interface Props { activeTab: 'learn' | 'play' }
 
@@ -25,6 +108,7 @@ async function rsaDecrypt(privateKey: CryptoKey, b64: string): Promise<string> {
 export function RSALearn() {
   return (
     <div className="space-y-6">
+      <StepPlayer steps={RSA_STEPS} accentColor="bg-purple-300" />
       <div className="bg-purple-300 border-4 border-black p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl">
         <h3 className="text-xl font-black uppercase mb-2">What is RSA?</h3>
         <p className="font-bold text-sm leading-relaxed">

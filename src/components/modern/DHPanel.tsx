@@ -1,5 +1,90 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import StepPlayer, { CipherStep } from './StepPlayer';
+
+const DH_STEPS: CipherStep[] = [
+  {
+    title: 'Public Parameters',
+    visual: (
+      <div className="flex items-center gap-4 flex-wrap justify-center">
+        <div className="bg-yellow-200 border-4 border-black px-5 py-4 rounded-2xl text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="text-xs font-black uppercase text-black/60">Prime</div>
+          <div className="font-black text-2xl">p = 23</div>
+        </div>
+        <div className="bg-orange-200 border-4 border-black px-5 py-4 rounded-2xl text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="text-xs font-black uppercase text-black/60">Generator</div>
+          <div className="font-black text-2xl">g = 5</div>
+        </div>
+        <div className="bg-black text-yellow-300 border-2 border-black px-3 py-1.5 rounded-xl font-black text-xs self-end">Shared publicly</div>
+      </div>
+    ),
+    explanation: "p=23 (prime) and g=5 (generator) are agreed upon and sent over the public channel. Anyone can see them.",
+  },
+  {
+    title: "Alice's Key",
+    visual: (
+      <div className="flex items-center gap-3 flex-wrap justify-center">
+        <div className="bg-cyan-300 border-4 border-black px-4 py-3 rounded-2xl text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="text-xs font-black">🔒 Secret</div>
+          <div className="font-black text-2xl">a = 6</div>
+        </div>
+        <div className="font-black text-xl">→</div>
+        <div className="bg-white border-2 border-black px-3 py-2 rounded-xl font-mono text-xs font-black">5⁶ mod 23</div>
+        <div className="font-black text-xl">=</div>
+        <div className="bg-cyan-200 border-4 border-black px-5 py-3 rounded-2xl font-black text-2xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">A = 8</div>
+      </div>
+    ),
+    explanation: "Alice picks secret a=6, computes A=gᵃ mod p=8, and sends A over the public channel. Eve sees A=8 but not a=6.",
+  },
+  {
+    title: "Bob's Key",
+    visual: (
+      <div className="flex items-center gap-3 flex-wrap justify-center">
+        <div className="bg-pink-300 border-4 border-black px-4 py-3 rounded-2xl text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="text-xs font-black">🔒 Secret</div>
+          <div className="font-black text-2xl">b = 15</div>
+        </div>
+        <div className="font-black text-xl">→</div>
+        <div className="bg-white border-2 border-black px-3 py-2 rounded-xl font-mono text-xs font-black">5¹⁵ mod 23</div>
+        <div className="font-black text-xl">=</div>
+        <div className="bg-pink-200 border-4 border-black px-5 py-3 rounded-2xl font-black text-2xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">B = 19</div>
+      </div>
+    ),
+    explanation: "Bob picks secret b=15, computes B=gᵇ mod p=19. He sends B to Alice. Eve sees B=19 but cannot recover b.",
+  },
+  {
+    title: 'Shared Secret',
+    visual: (
+      <div className="space-y-2 w-full max-w-sm mx-auto">
+        <div className="bg-cyan-200 border-4 border-black px-4 py-2 rounded-xl font-mono font-black text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          Alice: 19⁶ mod 23 = <strong>2</strong>
+        </div>
+        <div className="bg-pink-200 border-4 border-black px-4 py-2 rounded-xl font-mono font-black text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          Bob: 8¹⁵ mod 23 = <strong>2</strong>
+        </div>
+        <div className="bg-green-300 border-4 border-black px-4 py-3 rounded-xl font-black text-lg text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          ✓ Shared secret S = 2
+        </div>
+      </div>
+    ),
+    explanation: "Both compute the shared secret independently: Alice gets Bᵃ mod p, Bob gets Aᵇ mod p. Both equal gᵃᵇ mod p — they match!",
+  },
+  {
+    title: "Eve Can't Break It",
+    visual: (
+      <div className="space-y-2 w-full max-w-sm mx-auto">
+        <div className="bg-red-200 border-4 border-black px-4 py-3 rounded-xl font-bold text-sm">
+          Eve sees: p=23, g=5, A=8, B=19
+        </div>
+        <div className="bg-white border-2 border-black px-3 py-2 rounded-xl font-mono text-sm text-center">Must solve: 5^? ≡ 8 (mod 23)</div>
+        <div className="bg-red-400 border-4 border-black px-4 py-2 rounded-xl font-black text-sm text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          Discrete Log Problem — Hard!
+        </div>
+      </div>
+    ),
+    explanation: "Eve sees all public values but cannot recover a or b. Solving gˣ≡A (mod p) is the Discrete Logarithm Problem — computationally infeasible for large p.",
+  },
+];
 
 interface Props { activeTab: 'learn' | 'play' }
 
@@ -19,6 +104,7 @@ const PRIMES = [11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 
 export function DHLearn() {
   return (
     <div className="space-y-6">
+      <StepPlayer steps={DH_STEPS} accentColor="bg-teal-300" />
       <div className="bg-teal-300 border-4 border-black p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl">
         <h3 className="text-xl font-black uppercase mb-2">Diffie-Hellman Key Exchange</h3>
         <p className="font-bold text-sm leading-relaxed">

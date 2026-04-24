@@ -1,11 +1,106 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import StepPlayer, { CipherStep } from './StepPlayer';
+
+const KYBER_STEPS: CipherStep[] = [
+  {
+    title: 'Hidden Secret',
+    visual: (
+      <div className="flex flex-col items-center gap-3">
+        <div className="bg-black text-black border-4 border-black px-6 py-4 rounded-2xl font-black text-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] select-none">
+          s = [2, -1]
+        </div>
+        <div className="bg-black text-yellow-300 px-3 py-1 rounded font-black text-xs">🔒 never revealed</div>
+        <div className="text-xs font-bold text-black/50">Coefficients are tiny: -1, 0, or 1</div>
+      </div>
+    ),
+    explanation: "Kyber hides a small secret vector s with tiny coefficients. The entire security of the system rests on keeping s hidden.",
+  },
+  {
+    title: 'Noisy Equation 1',
+    visual: (
+      <div className="space-y-2 font-mono text-sm w-full max-w-xs mx-auto">
+        <div className="bg-white border-2 border-black p-2 rounded-xl">
+          b₁ = [3, 7] · <span className="bg-black text-yellow-300 px-1 rounded">s</span> + <span className="bg-red-200 border border-black px-1 rounded font-black">+1</span> mod 17
+        </div>
+        <div className="bg-cyan-100 border-2 border-black p-2 rounded-xl text-xs">
+          = [3×2 + 7×(−1)] + 1 mod 17<br/>
+          = [6 − 7] + 1 mod 17<br/>
+          = <strong>0 mod 17</strong>
+        </div>
+        <div className="text-xs font-bold text-black/50 text-center">Attacker sees: A=[3,7], b=0</div>
+      </div>
+    ),
+    explanation: "One public equation: b = A·s + small_noise mod q. The attacker sees A and b but NOT s or the tiny noise term.",
+  },
+  {
+    title: 'Noisy Equation 2',
+    visual: (
+      <div className="space-y-2 font-mono text-sm w-full max-w-xs mx-auto">
+        <div className="bg-white border-2 border-black p-2 rounded-xl">
+          b₂ = [11, 5] · <span className="bg-black text-yellow-300 px-1 rounded">s</span> + <span className="bg-red-200 border border-black px-1 rounded font-black">-1</span> mod 17
+        </div>
+        <div className="bg-pink-100 border-2 border-black p-2 rounded-xl text-xs">
+          = [11×2 + 5×(−1)] − 1 mod 17<br/>
+          = [22 − 5] − 1 mod 17<br/>
+          = <strong>16 mod 17</strong>
+        </div>
+        <div className="text-xs font-bold text-black/50 text-center">Attacker sees: A=[11,5], b=16</div>
+      </div>
+    ),
+    explanation: "A second noisy equation. Each gives a blurry hint about s. Together, many equations still hide s because the noise prevents exact solving.",
+  },
+  {
+    title: 'Lattice Hardness',
+    visual: (
+      <div className="flex flex-col items-center gap-2">
+        <svg viewBox="0 0 200 160" className="w-full max-w-[200px] border-2 border-black rounded-xl bg-white" style={{ height: 130 }}>
+          {[-1,0,1,2,3].flatMap(i => [-1,0,1,2,3].map(j => (
+            <g key={`${i}-${j}`}>
+              <circle cx={20+i*40} cy={20+j*35} r="3" fill="#a78bfa" stroke="black" strokeWidth="1" />
+            </g>
+          )))}
+          <circle cx="63" cy="57" r="6" fill="#f59e0b" stroke="black" strokeWidth="2" />
+          <text x="70" y="55" fontSize="9" fontWeight="bold" fill="#b45309">b (noisy)</text>
+          <circle cx="60" cy="55" r="4" fill="#22c55e" stroke="black" strokeWidth="1.5" />
+          <text x="40" y="70" fontSize="8" fill="#166534" fontWeight="bold">A·s (true)</text>
+          <line x1="63" y1="57" x2="60" y2="55" stroke="red" strokeWidth="1.5" strokeDasharray="3" />
+        </svg>
+        <div className="bg-red-300 border-2 border-black px-3 py-1 rounded font-black text-xs">CVP: Closest Vector Problem — NP-Hard</div>
+      </div>
+    ),
+    explanation: "Solving for s requires finding the nearest lattice point to the noisy vector b — the Closest Vector Problem. No quantum algorithm solves this efficiently.",
+  },
+  {
+    title: 'KEM: Encapsulate',
+    visual: (
+      <div className="space-y-2 w-full max-w-xs mx-auto">
+        <div className="flex gap-2 items-center">
+          <div className="bg-cyan-200 border-2 border-black px-3 py-2 rounded-xl font-black text-xs flex-1 text-center">Public Key</div>
+          <div className="font-black">→</div>
+          <div className="bg-violet-300 border-4 border-black px-3 py-3 rounded-xl font-black text-xs text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">Encapsulate</div>
+        </div>
+        <div className="flex gap-2">
+          <div className="bg-green-200 border-2 border-black px-3 py-2 rounded-xl font-black text-xs flex-1 text-center">Ciphertext (send)</div>
+          <div className="bg-yellow-300 border-2 border-black px-3 py-2 rounded-xl font-black text-xs flex-1 text-center">Shared Key</div>
+        </div>
+        <div className="flex gap-2 items-center mt-1">
+          <div className="bg-pink-200 border-2 border-black px-3 py-2 rounded-xl font-black text-xs flex-1 text-center">Private Key + Ciphertext</div>
+          <div className="font-black">→</div>
+          <div className="bg-yellow-300 border-2 border-black px-3 py-2 rounded-xl font-black text-xs flex-1 text-center">Same Key ✓</div>
+        </div>
+      </div>
+    ),
+    explanation: "Kyber is a KEM: sender encapsulates a random key using your public key. Only you (private key holder) can decapsulate and get the same key.",
+  },
+];
 
 interface Props { activeTab: 'learn' | 'play' }
 
 export function KyberLearn() {
   return (
     <div className="space-y-6">
+      <StepPlayer steps={KYBER_STEPS} accentColor="bg-violet-300" />
       <div className="bg-violet-300 border-4 border-black p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl">
         <h3 className="text-xl font-black uppercase mb-2">CRYSTALS-Kyber (ML-KEM)</h3>
         <p className="font-bold text-sm leading-relaxed">

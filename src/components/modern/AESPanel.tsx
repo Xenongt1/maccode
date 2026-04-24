@@ -1,5 +1,110 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import StepPlayer, { CipherStep } from './StepPlayer';
+
+const STATE_ORIG = [['19','A0','9A','E9'],['3D','F4','C6','F8'],['E3','E2','8D','48'],['BE','2B','2A','08']];
+const STATE_SUB  = [['D4','70','B3','57'],['69','CA','4E','25'],['12','98','17','45'],['AE','21','91','90']];
+const STATE_SHR  = [['D4','70','B3','57'],['CA','4E','25','69'],['17','45','12','98'],['90','AE','21','91']];
+const ROUND_KEY  = [['04','E0','48','28'],['66','CB','F8','06'],['81','19','D3','26'],['E5','9A','7A','4C']];
+const STATE_ARK  = STATE_SHR.map((row, r) => row.map((cell, c) => (parseInt(cell,16) ^ parseInt(ROUND_KEY[r][c],16)).toString(16).padStart(2,'0').toUpperCase()));
+
+function HexGrid({ data, highlight = '' }: { data: string[][]; highlight?: string }) {
+  const colors: Record<string, string> = { yellow: 'bg-yellow-200', cyan: 'bg-cyan-200', pink: 'bg-pink-200', green: 'bg-green-200', purple: 'bg-purple-200', white: 'bg-white' };
+  const bg = colors[highlight] || 'bg-white';
+  return (
+    <div className="grid grid-cols-4 gap-1">
+      {data.map((row, r) => row.map((cell, c) => (
+        <div key={`${r}-${c}`} className={`${bg} border-2 border-black w-10 h-10 flex items-center justify-center font-mono text-xs font-black rounded`}>{cell}</div>
+      )))}
+    </div>
+  );
+}
+
+const AES_STEPS: CipherStep[] = [
+  {
+    title: 'State Matrix',
+    visual: (
+      <div className="flex flex-col items-center gap-2">
+        <HexGrid data={STATE_ORIG} highlight="white" />
+        <div className="text-xs font-bold text-black/50">4 × 4 bytes = 128-bit block</div>
+      </div>
+    ),
+    explanation: "AES works on a 4×4 grid of bytes called the 'state'. Each cell holds one byte. A 16-byte message fills the entire grid.",
+  },
+  {
+    title: 'SubBytes',
+    visual: (
+      <div className="flex flex-col items-center gap-2">
+        <HexGrid data={STATE_SUB} highlight="yellow" />
+        <div className="text-xs font-bold">S-box: 19→D4, A0→70, 9A→B3…</div>
+      </div>
+    ),
+    explanation: "SubBytes replaces every byte using a nonlinear lookup table (S-box). This defeats algebraic attacks by removing patterns.",
+  },
+  {
+    title: 'ShiftRows',
+    visual: (
+      <div className="space-y-1">
+        {STATE_SHR.map((row, r) => (
+          <div key={r} className="flex items-center gap-1">
+            <span className="text-xs font-black w-14 text-right pr-2 text-black/50">Row {r} ↺{r}</span>
+            {row.map((cell, c) => (
+              <div key={c} className={`border-2 border-black w-10 h-8 flex items-center justify-center font-mono text-xs font-black rounded
+                ${r===0?'bg-white':r===1?'bg-cyan-200':r===2?'bg-pink-200':'bg-green-200'}`}>{cell}</div>
+            ))}
+          </div>
+        ))}
+      </div>
+    ),
+    explanation: "ShiftRows cyclically shifts each row left: row 0 stays, row 1 shifts by 1, row 2 by 2, row 3 by 3. This spreads bytes across columns.",
+  },
+  {
+    title: 'MixColumns',
+    visual: (
+      <div className="flex items-center gap-3 flex-wrap justify-center">
+        <div className="flex flex-col gap-1">
+          {['D4','CA','17','90'].map((b, i) => (
+            <div key={i} className="bg-purple-300 border-2 border-black w-10 h-8 flex items-center justify-center font-mono text-xs font-black rounded">{b}</div>
+          ))}
+          <div className="text-xs font-bold text-center">Column 1</div>
+        </div>
+        <div className="font-black text-2xl">→</div>
+        <div className="bg-black text-yellow-300 border-2 border-black px-2 py-1 rounded font-black text-xs text-center">GF(2⁸)<br/>matrix<br/>mul</div>
+        <div className="font-black text-2xl">→</div>
+        <div className="flex flex-col gap-1">
+          {['04','E0','48','28'].map((b, i) => (
+            <div key={i} className="bg-green-300 border-2 border-black w-10 h-8 flex items-center justify-center font-mono text-xs font-black rounded">{b}</div>
+          ))}
+          <div className="text-xs font-bold text-center">Mixed</div>
+        </div>
+        <div className="text-xs font-bold text-black/60 w-full text-center">1 byte in → all 4 bytes change</div>
+      </div>
+    ),
+    explanation: "MixColumns multiplies each column by a matrix over GF(2⁸). One changed byte diffuses into all four — maximizing avalanche.",
+  },
+  {
+    title: 'AddRoundKey',
+    visual: (
+      <div className="flex items-center gap-2 flex-wrap justify-center">
+        <div className="flex flex-col items-center gap-1">
+          <HexGrid data={[STATE_SHR[0]]} highlight="cyan" />
+          <div className="text-xs font-bold">State row</div>
+        </div>
+        <div className="font-black text-xl">⊕</div>
+        <div className="flex flex-col items-center gap-1">
+          <HexGrid data={[ROUND_KEY[0]]} highlight="pink" />
+          <div className="text-xs font-bold">Round key</div>
+        </div>
+        <div className="font-black text-xl">=</div>
+        <div className="flex flex-col items-center gap-1">
+          <HexGrid data={[STATE_ARK[0]]} highlight="green" />
+          <div className="text-xs font-bold">Result</div>
+        </div>
+      </div>
+    ),
+    explanation: "AddRoundKey XORs every byte with the round subkey. This is the only step that incorporates the secret key — repeated 10–14 times.",
+  },
+];
 
 async function aesEncrypt(text: string, password: string): Promise<string> {
   const enc = new TextEncoder();
@@ -38,6 +143,7 @@ interface Props { activeTab: 'learn' | 'play' }
 export function AESLearn() {
   return (
     <div className="space-y-6">
+      <StepPlayer steps={AES_STEPS} accentColor="bg-cyan-300" />
       <div className="bg-cyan-300 border-4 border-black p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl">
         <h3 className="text-xl font-black uppercase mb-2">What is AES?</h3>
         <p className="font-bold text-sm leading-relaxed">

@@ -1,5 +1,92 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import StepPlayer, { CipherStep } from './StepPlayer';
+
+const ECDH_STEPS: CipherStep[] = [
+  {
+    title: 'The Elliptic Curve',
+    visual: (
+      <div className="flex flex-col items-center gap-2">
+        <svg viewBox="-4 -3 8 6" className="w-full max-w-[200px] border-2 border-black rounded-xl bg-gray-50" style={{ height: 140 }}>
+          <line x1="-3.8" y1="0" x2="3.8" y2="0" stroke="black" strokeWidth="0.05" />
+          <line x1="0" y1="-2.8" x2="0" y2="2.8" stroke="black" strokeWidth="0.05" />
+          <path d="M -1.3 -0.5 C -0.8 -1.8 0 -2.2 0.8 -2.0 C 1.4 -1.8 2.2 -1.0 2.8 0.3" stroke="#6366f1" strokeWidth="0.08" fill="none" />
+          <path d="M -1.3 0.5 C -0.8 1.8 0 2.2 0.8 2.0 C 1.4 1.8 2.2 1.0 2.8 -0.3" stroke="#6366f1" strokeWidth="0.08" fill="none" />
+          <circle cx="0.5" cy="-1.9" r="0.15" fill="#0ea5e9" />
+          <text x="0.7" y="-2.0" fontSize="0.28" fontWeight="bold" fill="#0ea5e9">G</text>
+        </svg>
+        <div className="text-xs font-bold">y² = x³ + ax + b</div>
+      </div>
+    ),
+    explanation: "An elliptic curve is a set of points satisfying a simple equation. We choose a base point G on the curve — the starting point for all computations.",
+  },
+  {
+    title: "Alice's Key Pair",
+    visual: (
+      <div className="flex flex-col items-center gap-2">
+        <svg viewBox="-4 -3 8 6" className="w-full max-w-[200px] border-2 border-black rounded-xl bg-gray-50" style={{ height: 130 }}>
+          <path d="M -1.3 -0.5 C -0.8 -1.8 0 -2.2 0.8 -2.0 C 1.4 -1.8 2.2 -1.0 2.8 0.3" stroke="#6366f1" strokeWidth="0.08" fill="none" />
+          <path d="M -1.3 0.5 C -0.8 1.8 0 2.2 0.8 2.0 C 1.4 1.8 2.2 1.0 2.8 -0.3" stroke="#6366f1" strokeWidth="0.08" fill="none" />
+          <circle cx="0.5" cy="-1.9" r="0.13" fill="#0ea5e9" /><text x="0.7" y="-1.85" fontSize="0.25" fontWeight="bold" fill="#0ea5e9">G</text>
+          <circle cx="1.8" cy="-1.3" r="0.15" fill="#06b6d4" /><text x="2.0" y="-1.25" fontSize="0.25" fontWeight="bold" fill="#06b6d4">aG</text>
+        </svg>
+        <div className="flex gap-2">
+          <div className="bg-cyan-300 border-2 border-black px-2 py-1 rounded font-black text-xs">🔒 secret a</div>
+          <div className="bg-cyan-200 border-2 border-black px-2 py-1 rounded font-black text-xs">→ Public aG</div>
+        </div>
+      </div>
+    ),
+    explanation: "Alice picks secret integer a and computes aG by repeated point addition on the curve. aG is her public key — she sends it to Bob.",
+  },
+  {
+    title: "Bob's Key Pair",
+    visual: (
+      <div className="flex flex-col items-center gap-2">
+        <svg viewBox="-4 -3 8 6" className="w-full max-w-[200px] border-2 border-black rounded-xl bg-gray-50" style={{ height: 130 }}>
+          <path d="M -1.3 -0.5 C -0.8 -1.8 0 -2.2 0.8 -2.0 C 1.4 -1.8 2.2 -1.0 2.8 0.3" stroke="#6366f1" strokeWidth="0.08" fill="none" />
+          <path d="M -1.3 0.5 C -0.8 1.8 0 2.2 0.8 2.0 C 1.4 1.8 2.2 1.0 2.8 -0.3" stroke="#6366f1" strokeWidth="0.08" fill="none" />
+          <circle cx="0.5" cy="-1.9" r="0.13" fill="#0ea5e9" /><text x="0.7" y="-1.85" fontSize="0.25" fontWeight="bold" fill="#0ea5e9">G</text>
+          <circle cx="2.3" cy="-0.7" r="0.15" fill="#ec4899" /><text x="2.5" y="-0.65" fontSize="0.25" fontWeight="bold" fill="#ec4899">bG</text>
+        </svg>
+        <div className="flex gap-2">
+          <div className="bg-pink-300 border-2 border-black px-2 py-1 rounded font-black text-xs">🔒 secret b</div>
+          <div className="bg-pink-200 border-2 border-black px-2 py-1 rounded font-black text-xs">→ Public bG</div>
+        </div>
+      </div>
+    ),
+    explanation: "Bob picks secret integer b and computes bG. He sends bG to Alice. Eve can see aG and bG on the wire but cannot reverse point multiplication.",
+  },
+  {
+    title: 'Shared Secret abG',
+    visual: (
+      <div className="space-y-2 w-full max-w-xs mx-auto">
+        <div className="bg-cyan-200 border-4 border-black px-4 py-2 rounded-xl font-bold text-sm">Alice: a × (bG) = <strong>abG</strong></div>
+        <div className="bg-pink-200 border-4 border-black px-4 py-2 rounded-xl font-bold text-sm">Bob: b × (aG) = <strong>baG</strong></div>
+        <div className="bg-green-300 border-4 border-black px-4 py-3 rounded-xl font-black text-sm text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">abG = baG ✓ Same point!</div>
+        <div className="text-xs font-bold text-center text-black/60">x-coordinate of abG = shared secret</div>
+      </div>
+    ),
+    explanation: "Both arrive at the same point abG on the curve. The x-coordinate of this point is the shared secret, used as an AES key.",
+  },
+  {
+    title: 'Key Size Advantage',
+    visual: (
+      <div className="overflow-x-auto w-full">
+        <table className="w-full border-collapse text-sm font-bold">
+          <thead><tr>
+            {['Algorithm','Key Size','Security'].map(h => <th key={h} className="border-2 border-black p-2 bg-black text-yellow-300 text-xs">{h}</th>)}
+          </tr></thead>
+          <tbody>
+            {[['DH','2048 bits','112 bits','bg-red-100'],['ECDH P-256','256 bits','128 bits','bg-green-100'],['ECDH P-384','384 bits','192 bits','bg-green-100']].map(([a,k,s,c]) => (
+              <tr key={a} className={c}>{[a,k,s].map((v,i) => <td key={i} className="border-2 border-black p-2 text-xs text-center">{v}</td>)}</tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ),
+    explanation: "ECDH achieves the same security as DH with ~8× smaller keys. P-256 with 256 bits matches 3072-bit classical DH for security.",
+  },
+];
 
 interface Props { activeTab: 'learn' | 'play' }
 
@@ -45,6 +132,7 @@ async function ecdhDemo() {
 export function ECDHLearn() {
   return (
     <div className="space-y-6">
+      <StepPlayer steps={ECDH_STEPS} accentColor="bg-indigo-300" />
       <div className="bg-indigo-300 border-4 border-black p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl">
         <h3 className="text-xl font-black uppercase mb-2">Elliptic Curve Diffie-Hellman</h3>
         <p className="font-bold text-sm leading-relaxed">

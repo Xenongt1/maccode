@@ -1,10 +1,102 @@
 import { motion } from 'framer-motion';
+import StepPlayer, { CipherStep } from './StepPlayer';
 
 interface Props { activeTab: 'learn' | 'play' }
+
+const DES_STEPS: CipherStep[] = [
+  {
+    title: 'Split the Block',
+    visual: (
+      <div className="flex flex-col items-center gap-3 w-full">
+        <div className="bg-yellow-200 border-4 border-black font-mono text-xs px-4 py-3 rounded-xl font-black w-full max-w-xs text-center">64-bit plaintext block</div>
+        <div className="font-black text-xl">↓</div>
+        <div className="flex gap-4 w-full max-w-xs">
+          <div className="flex-1 bg-cyan-300 border-4 border-black px-3 py-3 rounded-xl text-center font-black text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">L₀<br/><span className="text-xs font-bold">32 bits</span></div>
+          <div className="flex-1 bg-pink-300 border-4 border-black px-3 py-3 rounded-xl text-center font-black text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">R₀<br/><span className="text-xs font-bold">32 bits</span></div>
+        </div>
+      </div>
+    ),
+    explanation: "The 64-bit plaintext block is split into two equal 32-bit halves: Left (L₀) and Right (R₀). This is the Feistel structure.",
+  },
+  {
+    title: 'f-Function',
+    visual: (
+      <div className="flex flex-col items-center gap-1 text-xs font-black">
+        {[
+          { label: 'R₀ (32 bits)', color: 'bg-pink-200' },
+          { label: '↓ Expand 32→48', color: 'bg-white text-black/50' },
+          { label: '⊕ Round Key K₁', color: 'bg-yellow-200' },
+          { label: '8 S-boxes 48→32', color: 'bg-green-200' },
+          { label: 'Permutation P', color: 'bg-purple-200' },
+          { label: 'f(R₀, K₁)', color: 'bg-orange-300' },
+        ].map((s, i) => (
+          <div key={i} className={`${s.color} border-2 border-black px-4 py-1.5 rounded-xl w-40 text-center`}>{s.label}</div>
+        ))}
+      </div>
+    ),
+    explanation: "The f-function: expand R to 48 bits, XOR with round key, pass through 8 nonlinear S-boxes, then permute — creating confusion and diffusion.",
+  },
+  {
+    title: 'Feistel Round',
+    visual: (
+      <div className="space-y-3 w-full max-w-xs mx-auto">
+        <div className="flex items-center gap-2">
+          <div className="bg-cyan-200 border-2 border-black px-3 py-2 rounded-xl font-black text-sm text-center flex-1">L₁ = R₀</div>
+          <div className="text-xs font-bold text-black/40">(simple copy)</div>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="bg-pink-200 border-2 border-black px-2 py-2 rounded-xl font-black text-xs text-center">L₀</div>
+          <div className="font-black">⊕</div>
+          <div className="bg-orange-200 border-2 border-black px-2 py-2 rounded-xl font-black text-xs text-center">f(R₀,K₁)</div>
+          <div className="font-black">=</div>
+          <div className="bg-green-300 border-4 border-black px-2 py-2 rounded-xl font-black text-xs shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">R₁</div>
+        </div>
+      </div>
+    ),
+    explanation: "Each round: new Left = old Right. New Right = old Left XOR f(old Right, round key). The halves swap and mix simultaneously.",
+  },
+  {
+    title: '16 Rounds',
+    visual: (
+      <div className="space-y-1 w-full max-w-xs mx-auto">
+        {[1,2,3].map(i => (
+          <div key={i} className="flex gap-2 items-center">
+            <span className="text-xs font-black w-12 text-right">Rnd {i}</span>
+            <div className="flex-1 bg-cyan-100 border-2 border-black px-2 py-1 rounded font-black text-xs text-center">L{i}</div>
+            <div className="flex-1 bg-pink-100 border-2 border-black px-2 py-1 rounded font-black text-xs text-center">R{i}</div>
+          </div>
+        ))}
+        <div className="text-center font-black text-lg">⋮</div>
+        <div className="flex gap-2 items-center">
+          <span className="text-xs font-black w-12 text-right">Rnd 16</span>
+          <div className="flex-1 bg-yellow-300 border-4 border-black px-2 py-1 rounded font-black text-xs text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">L₁₆</div>
+          <div className="flex-1 bg-yellow-300 border-4 border-black px-2 py-1 rounded font-black text-xs text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">R₁₆</div>
+        </div>
+      </div>
+    ),
+    explanation: "DES repeats the Feistel round 16 times. Each round uses a different 48-bit subkey derived from the 56-bit master key.",
+  },
+  {
+    title: 'Output',
+    visual: (
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex gap-3">
+          <div className="bg-pink-200 border-4 border-black px-4 py-3 rounded-xl font-black text-sm text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">R₁₆</div>
+          <span className="font-black text-xl self-center">|</span>
+          <div className="bg-cyan-200 border-4 border-black px-4 py-3 rounded-xl font-black text-sm text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">L₁₆</div>
+        </div>
+        <div className="bg-red-100 border-2 border-black px-3 py-1 rounded font-bold text-xs text-center">Halves swapped before final permutation IP⁻¹</div>
+        <div className="bg-green-300 border-4 border-black px-6 py-3 rounded-xl font-black text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">64-bit Ciphertext</div>
+      </div>
+    ),
+    explanation: "After 16 rounds, R₁₆ and L₁₆ are swapped and run through the final IP⁻¹ permutation. The result is the 64-bit DES ciphertext.",
+  },
+];
 
 export function DESLearn() {
   return (
     <div className="space-y-6">
+      <StepPlayer steps={DES_STEPS} accentColor="bg-orange-300" />
       <div className="bg-orange-300 border-4 border-black p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl">
         <h3 className="text-xl font-black uppercase mb-2">What is DES?</h3>
         <p className="font-bold text-sm leading-relaxed">

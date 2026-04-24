@@ -1,10 +1,79 @@
 import { motion } from 'framer-motion';
+import StepPlayer, { CipherStep } from './StepPlayer';
+
+const TDES_STEPS: CipherStep[] = [
+  {
+    title: 'Plaintext In',
+    visual: (
+      <div className="flex flex-col items-center gap-3">
+        <div className="bg-yellow-200 border-4 border-black font-black text-sm text-center px-6 py-4 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">64-bit Plaintext</div>
+        <div className="font-black text-xl">↓</div>
+        <div className="text-xs font-bold text-black/50">Enters EDE chain →</div>
+      </div>
+    ),
+    explanation: "3DES accepts the same 64-bit block as DES. It runs the block through three DES operations to multiply security.",
+  },
+  {
+    title: 'EDE: Encrypt with K1',
+    visual: (
+      <div className="flex items-center gap-2 flex-wrap justify-center">
+        <div className="bg-yellow-200 border-4 border-black px-3 py-3 rounded-xl font-black text-xs text-center min-w-[70px]">Plaintext</div>
+        <div className="font-black text-xl">→</div>
+        <div className="bg-cyan-400 border-4 border-black px-3 py-4 rounded-xl font-black text-xs text-center min-w-[70px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ring-4 ring-black">
+          DES ENC<br/>K1
+        </div>
+        <div className="font-black text-xl text-black/30">→</div>
+        <div className="bg-gray-100 border-2 border-dashed border-black px-3 py-4 rounded-xl font-bold text-xs text-center min-w-[70px] text-black/40">
+          DES DEC<br/>K2
+        </div>
+        <div className="font-black text-xl text-black/20">→</div>
+        <div className="bg-gray-100 border-2 border-dashed border-black px-3 py-4 rounded-xl font-bold text-xs text-center min-w-[70px] text-black/40">
+          DES ENC<br/>K3
+        </div>
+      </div>
+    ),
+    explanation: "Step 1: Encrypt with K1 using standard DES. This first pass randomizes the plaintext.",
+  },
+  {
+    title: 'EDE: Decrypt with K2',
+    visual: (
+      <div className="flex items-center gap-2 flex-wrap justify-center">
+        <div className="bg-gray-100 border-2 border-dashed border-black px-3 py-4 rounded-xl font-bold text-xs text-center min-w-[70px] text-black/40">DES ENC K1</div>
+        <div className="font-black text-xl">→</div>
+        <div className="bg-pink-400 border-4 border-black px-3 py-4 rounded-xl font-black text-xs text-center min-w-[70px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ring-4 ring-black">
+          DES DEC<br/>K2
+        </div>
+        <div className="font-black text-xl text-black/30">→</div>
+        <div className="bg-gray-100 border-2 border-dashed border-black px-3 py-4 rounded-xl font-bold text-xs text-center min-w-[70px] text-black/40">DES ENC K3</div>
+      </div>
+    ),
+    explanation: "Step 2: DECRYPT (not encrypt!) with K2. This unusual step allows K1=K2=K3 to degenerate back to plain DES for backward compatibility.",
+  },
+  {
+    title: 'EDE: Encrypt with K3',
+    visual: (
+      <div className="flex items-center gap-2 flex-wrap justify-center">
+        <div className="bg-gray-100 border-2 border-dashed border-black px-3 py-4 rounded-xl font-bold text-xs text-center min-w-[70px] text-black/40">DES ENC K1</div>
+        <div className="font-black text-xl text-black/30">→</div>
+        <div className="bg-gray-100 border-2 border-dashed border-black px-3 py-4 rounded-xl font-bold text-xs text-center min-w-[70px] text-black/40">DES DEC K2</div>
+        <div className="font-black text-xl">→</div>
+        <div className="bg-green-400 border-4 border-black px-3 py-4 rounded-xl font-black text-xs text-center min-w-[70px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ring-4 ring-black">
+          DES ENC<br/>K3
+        </div>
+        <div className="font-black text-xl">→</div>
+        <div className="bg-purple-200 border-4 border-black px-3 py-3 rounded-xl font-black text-xs text-center min-w-[70px]">Ciphertext</div>
+      </div>
+    ),
+    explanation: "Step 3: Encrypt again with K3. The full EDE chain (Encrypt-Decrypt-Encrypt) produces ~112 bits of effective security with 3 independent keys.",
+  },
+];
 
 interface Props { activeTab: 'learn' | 'play' }
 
 export function TripleDESLearn() {
   return (
     <div className="space-y-6">
+      <StepPlayer steps={TDES_STEPS} accentColor="bg-pink-300" />
       <div className="bg-pink-300 border-4 border-black p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl">
         <h3 className="text-xl font-black uppercase mb-2">What is 3DES?</h3>
         <p className="font-bold text-sm leading-relaxed">

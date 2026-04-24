@@ -1,5 +1,107 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import StepPlayer, { CipherStep } from './StepPlayer';
+
+function RotorRing({ letter, color, highlight = false }: { letter: string; color: string; highlight?: boolean }) {
+  return (
+    <div className={`${color} border-4 border-black w-14 h-14 flex items-center justify-center font-black text-2xl rounded-full shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] ${highlight ? 'ring-4 ring-yellow-400' : ''}`}>
+      {letter}
+    </div>
+  );
+}
+
+const ENIGMA_STEPS: CipherStep[] = [
+  {
+    title: 'Starting Position',
+    visual: (
+      <div className="flex flex-col items-center gap-3">
+        <div className="text-xs font-black uppercase text-black/50 mb-1">Rotors: I II III — all at A</div>
+        <div className="flex gap-4 items-center">
+          <div className="text-center"><RotorRing letter="A" color="bg-cyan-200" /><div className="text-xs font-black mt-1">Left</div></div>
+          <div className="text-center"><RotorRing letter="A" color="bg-pink-200" /><div className="text-xs font-black mt-1">Middle</div></div>
+          <div className="text-center"><RotorRing letter="A" color="bg-yellow-200" highlight /><div className="text-xs font-black mt-1">Right ↑</div></div>
+        </div>
+        <div className="bg-black text-yellow-300 px-3 py-1.5 rounded-xl font-black text-xs">Press key 'A' →</div>
+      </div>
+    ),
+    explanation: "Before any key is pressed, all three rotors sit at position A. The rightmost rotor steps every single keypress.",
+  },
+  {
+    title: 'Rotor Steps',
+    visual: (
+      <div className="flex flex-col items-center gap-3">
+        <div className="text-xs font-bold text-black/50">After pressing 'A'</div>
+        <div className="flex gap-4 items-center">
+          <div className="text-center"><RotorRing letter="A" color="bg-cyan-200" /><div className="text-xs font-black mt-1">Left</div></div>
+          <div className="text-center"><RotorRing letter="A" color="bg-pink-200" /><div className="text-xs font-black mt-1">Middle</div></div>
+          <div className="text-center"><RotorRing letter="B" color="bg-yellow-300" highlight /><div className="text-xs font-black mt-1">Right ↑+1</div></div>
+        </div>
+        <div className="bg-green-200 border-2 border-black px-3 py-1.5 rounded-xl font-bold text-xs">A → B: right rotor stepped</div>
+      </div>
+    ),
+    explanation: "The rightmost rotor advances by 1 position with every keypress. After 26 presses, it carries over to the middle rotor — like an odometer.",
+  },
+  {
+    title: 'Signal Path',
+    visual: (
+      <div className="flex flex-col gap-1 text-xs font-black">
+        <div className="flex flex-wrap gap-1 justify-center">
+          {['Key A','Plugboard','→ Rotor R','→ Rotor M','→ Rotor L','↔ Reflect','← Rotor L','← Rotor M','← Rotor R','Plugboard','Lamp'].map((s, i) => (
+            <div key={i} className={`border-2 border-black px-1.5 py-1 rounded text-center text-xs
+              ${i===0?'bg-yellow-300':i===5?'bg-purple-300':i===10?'bg-green-300':'bg-white'}`}>
+              {s}
+            </div>
+          ))}
+        </div>
+        <div className="text-center text-black/50 text-xs mt-1">Current path through 11 stages</div>
+      </div>
+    ),
+    explanation: "The electrical signal travels right-to-left through the rotors, bounces off the reflector, and returns left-to-right. It never encodes a letter as itself.",
+  },
+  {
+    title: 'Polyalphabetic',
+    visual: (
+      <div className="w-full overflow-x-auto">
+        <table className="w-full border-collapse text-xs font-bold">
+          <thead><tr>
+            {['Keypress','Rotor R','Rotor M','Output'].map(h => <th key={h} className="border-2 border-black p-1 bg-black text-yellow-300">{h}</th>)}
+          </tr></thead>
+          <tbody>
+            {[['1','B','A','G'],['2','C','A','T'],['3','D','A','Z'],['4','E','A','Q']].map(([n,r,m,o]) => (
+              <tr key={n} className="even:bg-yellow-50">
+                <td className="border-2 border-black p-1 text-center">{n}</td>
+                <td className="border-2 border-black p-1 text-center">{r}</td>
+                <td className="border-2 border-black p-1 text-center">{m}</td>
+                <td className="border-2 border-black p-1 text-center bg-yellow-200 font-black">{o}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="text-center text-xs font-bold mt-1 text-black/60">Same key 'A' → different letter each time</div>
+      </div>
+    ),
+    explanation: "Because rotors step before each keypress, pressing 'A' four times produces four different ciphertext letters. This defeats frequency analysis.",
+  },
+  {
+    title: 'Double-Stepping',
+    visual: (
+      <div className="space-y-2 w-full max-w-xs mx-auto">
+        <div className="text-xs font-black uppercase text-center mb-1">Notch anomaly at position V</div>
+        {[['Normal','V','E','A'],['Anomaly','W','F','B']].map(([label, r, m, l]) => (
+          <div key={label} className={`flex gap-2 items-center p-2 rounded-xl border-4 border-black ${label==='Anomaly'?'bg-red-200 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]':'bg-white'}`}>
+            <span className="text-xs font-black w-16">{label}</span>
+            {[r,m,l].map((v, i) => (
+              <div key={i} className={`border-2 border-black rounded-full w-10 h-10 flex items-center justify-center font-black text-sm
+                ${label==='Anomaly'&&i===1?'bg-red-400':i===0?'bg-yellow-200':i===1?'bg-pink-200':'bg-cyan-200'}`}>{v}</div>
+            ))}
+            <span className="text-xs font-bold text-black/50">{['R','M','L'].join(' ')}</span>
+          </div>
+        ))}
+      </div>
+    ),
+    explanation: "The double-stepping anomaly: when the middle rotor's notch aligns, it steps AGAIN even though it stepped the previous keypress too — a famous Enigma quirk exploited by codebreakers.",
+  },
+];
 
 interface Props { activeTab: 'learn' | 'play' }
 
@@ -73,6 +175,7 @@ function enigmaEncrypt(
 export function EnigmaLearn() {
   return (
     <div className="space-y-6">
+      <StepPlayer steps={ENIGMA_STEPS} accentColor="bg-stone-300" />
       <div className="bg-stone-300 border-4 border-black p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl">
         <h3 className="text-xl font-black uppercase mb-2">The Enigma Machine</h3>
         <p className="font-bold text-sm leading-relaxed">

@@ -1,5 +1,120 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import StepPlayer, { CipherStep } from './StepPlayer';
+
+const BB84_STEPS: CipherStep[] = [
+  {
+    title: 'Alice Sends Photons',
+    visual: (
+      <div className="w-full overflow-x-auto">
+        <table className="w-full border-collapse text-xs font-bold">
+          <thead><tr>
+            {['#','Bit','Basis','Symbol'].map(h => <th key={h} className="border-2 border-black p-1 bg-black text-yellow-300">{h}</th>)}
+          </tr></thead>
+          <tbody>
+            {[['1','1','+','↔'],['2','0','×','↗'],['3','1','×','↘'],['4','0','+','↕']].map(([n,b,bas,sym]) => (
+              <tr key={n} className="bg-cyan-100">
+                <td className="border-2 border-black p-1 text-center">{n}</td>
+                <td className="border-2 border-black p-1 text-center">{b}</td>
+                <td className="border-2 border-black p-1 text-center">{bas}</td>
+                <td className="border-2 border-black p-1 text-center text-xl">{sym}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ),
+    explanation: "Alice randomly picks a bit (0/1) and a basis (+/×) for each photon. The basis determines the polarization angle.",
+  },
+  {
+    title: 'Bob Measures',
+    visual: (
+      <div className="w-full overflow-x-auto">
+        <table className="w-full border-collapse text-xs font-bold">
+          <thead><tr>
+            {['#','Alice','Bob basis','Bob result','Match?'].map(h => <th key={h} className="border-2 border-black p-1 bg-black text-yellow-300">{h}</th>)}
+          </tr></thead>
+          <tbody>
+            {[
+              ['1','↔','+','1','✓','bg-green-100'],
+              ['2','↗','+','?','✗','bg-red-100'],
+              ['3','↘','×','1','✓','bg-green-100'],
+              ['4','↕','×','?','✗','bg-red-100'],
+            ].map(([n,a,bb,br,m,c]) => (
+              <tr key={n} className={c}>
+                <td className="border-2 border-black p-1 text-center">{n}</td>
+                <td className="border-2 border-black p-1 text-center text-xl">{a}</td>
+                <td className="border-2 border-black p-1 text-center">{bb}</td>
+                <td className="border-2 border-black p-1 text-center">{br}</td>
+                <td className="border-2 border-black p-1 text-center font-black">{m}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ),
+    explanation: "Bob randomly picks a basis. When he picks the WRONG basis, his measurement is random — he disturbs the quantum state.",
+  },
+  {
+    title: 'Basis Sifting',
+    visual: (
+      <div className="space-y-2 w-full">
+        <div className="w-full overflow-x-auto">
+          <table className="w-full border-collapse text-xs font-bold">
+            <thead><tr>
+              {['#','Alice basis','Bob basis','Keep?'].map(h => <th key={h} className="border-2 border-black p-1 bg-black text-yellow-300">{h}</th>)}
+            </tr></thead>
+            <tbody>
+              {[['1','+','+','✓ Keep','bg-green-200'],['2','×','+','✗ Drop','bg-gray-100'],['3','×','×','✓ Keep','bg-green-200'],['4','+','×','✗ Drop','bg-gray-100']].map(([n,a,b,k,c]) => (
+                <tr key={n} className={c}>
+                  <td className="border-2 border-black p-1 text-center">{n}</td>
+                  <td className="border-2 border-black p-1 text-center">{a}</td>
+                  <td className="border-2 border-black p-1 text-center">{b}</td>
+                  <td className="border-2 border-black p-1 text-center font-black">{k}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="bg-yellow-300 border-4 border-black px-4 py-2 rounded-xl font-black text-sm text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">Sifted key = 1, 1</div>
+      </div>
+    ),
+    explanation: "Comparing bases over a public channel, they keep photons 1 and 3 (matching bases). ~50% of photons survive sifting.",
+  },
+  {
+    title: 'Eve Gets Caught',
+    visual: (
+      <div className="space-y-2 w-full max-w-sm mx-auto text-xs font-bold">
+        <div className="flex items-center gap-2">
+          <div className="bg-cyan-200 border-2 border-black px-2 py-1 rounded">Alice sends ↔</div>
+          <div className="font-black">→</div>
+          <div className="bg-red-300 border-2 border-black px-2 py-1 rounded">Eve: guesses ×<br/>measures → ↗</div>
+          <div className="font-black">→</div>
+          <div className="bg-pink-200 border-2 border-black px-2 py-1 rounded">Bob: uses +<br/>gets 0 ≠ 1</div>
+        </div>
+        <div className="bg-red-400 border-4 border-black px-4 py-2 rounded-xl font-black text-sm text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          Error rate jumps to ~25% — Eve detected!
+        </div>
+      </div>
+    ),
+    explanation: "Eve must guess a basis. Wrong guess disturbs the photon. Even when Bob and Alice use the same basis, they'll disagree ~25% of the time — revealing the eavesdropper.",
+  },
+  {
+    title: 'Shared Secret Key',
+    visual: (
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex gap-3">
+          {['1','1'].map((b, i) => (
+            <div key={i} className="bg-green-300 border-4 border-black w-16 h-16 flex items-center justify-center font-black text-4xl rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">{b}</div>
+          ))}
+        </div>
+        <div className="bg-green-400 border-4 border-black px-4 py-2 rounded-xl font-black text-xs text-center">Error rate: 0% — No Eve detected ✓</div>
+        <div className="text-xs font-bold text-black/60">These bits seed a symmetric key after privacy amplification</div>
+      </div>
+    ),
+    explanation: "With no eavesdropper, Alice and Bob's sifted bits match perfectly. After comparing a test subset, remaining bits form the provably secure key.",
+  },
+];
 
 interface Props { activeTab: 'learn' | 'play' }
 
@@ -49,6 +164,7 @@ const symbols: Record<string, string> = {
 export function BB84Learn() {
   return (
     <div className="space-y-6">
+      <StepPlayer steps={BB84_STEPS} accentColor="bg-sky-300" />
       <div className="bg-sky-300 border-4 border-black p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl">
         <h3 className="text-xl font-black uppercase mb-2">BB84 Quantum Key Distribution</h3>
         <p className="font-bold text-sm leading-relaxed">

@@ -1,5 +1,114 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import StepPlayer, { CipherStep } from './StepPlayer';
+
+const CAT_HASH = '3c0a7167b2c66c15a2397f6ba';
+const CATX_HASH = 'a7fb2c44d91e8f3b6c552';
+function HexDiff({ a, b }: { a: string; b: string }) {
+  return (
+    <div className="font-mono text-xs break-all">
+      {a.split('').map((c, i) => (
+        <span key={i} className={c !== b[i] ? 'bg-yellow-300 text-black' : ''}>{c}</span>
+      ))}
+    </div>
+  );
+}
+
+const SHA_STEPS: CipherStep[] = [
+  {
+    title: 'Input → Bits',
+    visual: (
+      <div className="flex flex-col items-center gap-2 w-full">
+        <div className="bg-yellow-200 border-4 border-black font-black text-2xl px-6 py-3 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">CAT</div>
+        <div className="font-black text-xl">↓</div>
+        <div className="flex gap-1 flex-wrap justify-center">
+          {['01000011','01000001','01010100'].map((b, i) => (
+            <div key={i} className="flex gap-0.5">
+              {b.split('').map((bit, j) => (
+                <span key={j} className={`w-5 h-5 flex items-center justify-center border border-black rounded text-xs font-black ${bit==='1'?'bg-cyan-200':'bg-white'}`}>{bit}</span>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="text-xs font-bold text-black/50">C=0x43, A=0x41, T=0x54</div>
+      </div>
+    ),
+    explanation: "Any input is converted to binary. 'CAT' = 3 bytes = 24 bits. SHA-256 accepts any length — from empty string to gigabytes.",
+  },
+  {
+    title: 'Padding to 512 bits',
+    visual: (
+      <div className="flex flex-col items-center gap-2 w-full">
+        <div className="flex gap-1 flex-wrap justify-center items-center">
+          <div className="bg-cyan-200 border-2 border-black px-2 py-1 rounded font-black text-xs">24 data bits</div>
+          <div className="bg-yellow-300 border-2 border-black w-5 h-5 flex items-center justify-center font-black text-xs rounded">1</div>
+          <div className="bg-gray-100 border-2 border-black px-2 py-1 rounded font-bold text-xs text-black/40">423 zero bits</div>
+          <div className="bg-black text-yellow-300 border-2 border-black px-2 py-1 rounded font-black text-xs">64-bit length=24</div>
+        </div>
+        <div className="bg-purple-200 border-4 border-black px-4 py-1 rounded-xl font-black text-sm">= 512-bit block</div>
+      </div>
+    ),
+    explanation: "SHA-256 pads the message to 512 bits: append a '1' bit, then enough zeros, then the original length as a 64-bit integer.",
+  },
+  {
+    title: '64 Compression Rounds',
+    visual: (
+      <div className="flex flex-col items-center gap-2">
+        <div className="bg-cyan-200 border-2 border-black px-4 py-2 rounded-xl font-bold text-xs text-center">Initial state: H₀…H₇ (256 bits)</div>
+        <div className="font-black text-xl">↓</div>
+        <div className="bg-purple-300 border-4 border-black px-5 py-4 rounded-xl font-black text-sm text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          64 rounds of<br/>Σ ⊕ Maj ⊕ Ch ⊕ K
+        </div>
+        <div className="font-black text-xl">↓</div>
+        <div className="bg-green-200 border-2 border-black px-4 py-2 rounded-xl font-bold text-xs text-center">New state: H₀…H₇ (256 bits)</div>
+        <div className="text-xs font-bold text-black/50">Constants from √prime₂…√prime₁₉</div>
+      </div>
+    ),
+    explanation: "Each 512-bit block runs through 64 rounds, mixing the 256-bit state with message words and round constants. The state grows completely unpredictable.",
+  },
+  {
+    title: 'Avalanche Effect',
+    visual: (
+      <div className="space-y-2 w-full">
+        <div className="flex gap-2 items-center">
+          <div className="bg-yellow-100 border-2 border-black px-2 py-1 rounded font-bold text-xs w-14 text-center">CAT</div>
+          <div className="flex-1 bg-white border-2 border-black p-1 rounded-xl"><HexDiff a={CAT_HASH} b={CATX_HASH} /></div>
+        </div>
+        <div className="flex gap-2 items-center">
+          <div className="bg-yellow-100 border-2 border-black px-2 py-1 rounded font-bold text-xs w-14 text-center">CAT!</div>
+          <div className="flex-1 bg-white border-2 border-black p-1 rounded-xl"><HexDiff a={CATX_HASH} b={CAT_HASH} /></div>
+        </div>
+        <div className="bg-yellow-300 border-2 border-black px-3 py-1 rounded font-black text-xs text-center">Yellow = different character</div>
+      </div>
+    ),
+    explanation: "One character change flips roughly half the output bits — the avalanche effect. This ensures no two similar inputs produce similar hashes.",
+  },
+  {
+    title: 'One-Way Function',
+    visual: (
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex items-center gap-3">
+          <div className="bg-yellow-200 border-4 border-black px-4 py-3 rounded-xl font-black text-sm">CAT</div>
+          <div className="text-green-600 font-black text-xl">→</div>
+          <div className="bg-black text-yellow-300 border-4 border-black px-3 py-3 rounded-xl font-black text-xs text-center">SHA<br/>256</div>
+          <div className="text-green-600 font-black text-xl">→</div>
+          <div className="bg-green-200 border-4 border-black px-2 py-3 rounded-xl font-mono text-xs">3c0a…</div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="bg-gray-100 border-4 border-black px-2 py-3 rounded-xl font-mono text-xs">3c0a…</div>
+          <div className="text-red-600 font-black text-xl">→</div>
+          <div className="bg-black text-yellow-300 border-4 border-black px-3 py-3 rounded-xl font-black text-xs text-center relative">
+            SHA<br/>256
+            <span className="absolute inset-0 flex items-center justify-center text-red-400 text-3xl font-black">✗</span>
+          </div>
+          <div className="text-red-600 font-black text-xl">→</div>
+          <div className="bg-red-200 border-4 border-black px-2 py-3 rounded-xl font-black text-xs">???</div>
+        </div>
+      </div>
+    ),
+    explanation: "Computing the hash is fast (milliseconds). Reversing it requires trying 2¹²⁸ inputs on average. SHA-256 is a trapdoor — one direction only.",
+  },
+];
 
 interface Props { activeTab: 'learn' | 'play' }
 
@@ -19,6 +128,7 @@ function diffCount(a: string, b: string): number {
 export function SHA256Learn() {
   return (
     <div className="space-y-6">
+      <StepPlayer steps={SHA_STEPS} accentColor="bg-amber-300" />
       <div className="bg-amber-300 border-4 border-black p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl">
         <h3 className="text-xl font-black uppercase mb-2">What is SHA-256?</h3>
         <p className="font-bold text-sm leading-relaxed">

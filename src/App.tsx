@@ -373,27 +373,31 @@ function App() {
                   <ul className="space-y-2 sm:space-y-3 text-sm sm:text-base font-bold">
                     <li className="flex items-start gap-3">
                       <span className="text-black text-xl mt-0.5">→</span>
-                      <span>6 classical cipher implementations</span>
+                      <span>8 classical cipher visualizers with frame-by-frame playback</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-black text-xl mt-0.5">→</span>
-                      <span>Step-by-step animated visualizations</span>
+                      <span>12 modern crypto schemes with animated step-through explanations</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-black text-xl mt-0.5">→</span>
-                      <span>Real-time frequency analysis</span>
+                      <span>Real AES-256-GCM, RSA-2048, ECDH P-256 & SHA-256 via Web Crypto API</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-black text-xl mt-0.5">→</span>
-                      <span>Encryption and decryption modes</span>
+                      <span>Post-quantum cryptography: ML-KEM (Kyber) and McEliece explained</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-black text-xl mt-0.5">→</span>
-                      <span>Export functionality (JSON, text, clipboard)</span>
+                      <span>BB84 quantum key distribution simulation with Eve eavesdropping toggle</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-black text-xl mt-0.5">→</span>
-                      <span>Keyboard controls for easy navigation</span>
+                      <span>Authentic Enigma machine simulation with rotor stepping & plugboard</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-black text-xl mt-0.5">→</span>
+                      <span>Frequency analysis, export (JSON/text/clipboard), keyboard controls</span>
                     </li>
                   </ul>
                 </div>
@@ -509,13 +513,13 @@ function App() {
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-4 sm:pt-6">
                 <a
-                  href=""
+                  href="https://linktr.ee/Chef1t"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-white border-4 border-black text-black font-black uppercase hover:translate-x-1 hover:translate-y-1 transition-transform shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] rounded-xl"
                 >
                   <PersonStanding className="w-4 sm:w-5 h-4 sm:h-5" />
-                  Checkout creator
+                  Meet the Creator
                 </a>
                 <button
                   onClick={() => setCurrentSection('visualizer')}

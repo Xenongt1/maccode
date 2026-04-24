@@ -1,11 +1,88 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import StepPlayer, { CipherStep } from './StepPlayer';
+
+const MCELIECE_STEPS: CipherStep[] = [
+  {
+    title: 'Message to Bits',
+    visual: (
+      <div className="flex flex-col items-center gap-3">
+        <div className="bg-yellow-200 border-4 border-black font-black text-3xl px-6 py-3 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">HELP</div>
+        <div className="font-black text-xl">↓</div>
+        <div className="bg-white border-2 border-black px-3 py-2 rounded-xl font-mono text-xs">01001000 01000101 01001100 01010000</div>
+        <div className="text-xs font-bold text-black/50">32 bits total</div>
+      </div>
+    ),
+    explanation: "Convert the message to binary. McEliece operates on bit vectors — HELP becomes 32 bits of binary data.",
+  },
+  {
+    title: 'Encode with Goppa Code',
+    visual: (
+      <div className="flex flex-col items-center gap-2">
+        <div className="bg-white border-2 border-black px-3 py-2 rounded-xl font-mono text-xs">01001000 01000101…</div>
+        <div className="font-black text-xl">↓</div>
+        <div className="bg-purple-300 border-4 border-black px-5 py-4 rounded-xl font-black text-sm text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">Generator Matrix G<br/><span className="text-xs font-bold">(public key)</span></div>
+        <div className="font-black text-xl">↓</div>
+        <div className="flex gap-2 items-center">
+          <div className="bg-white border-2 border-black px-2 py-1 rounded font-mono text-xs">01001000…</div>
+          <div className="bg-green-300 border-2 border-black px-2 py-1 rounded font-black text-xs">+8 parity bits</div>
+        </div>
+      </div>
+    ),
+    explanation: "The message is encoded using the public generator matrix derived from a Goppa error-correcting code, adding redundant parity bits.",
+  },
+  {
+    title: 'Inject t Errors',
+    visual: (
+      <div className="flex flex-col items-center gap-2">
+        <div className="flex gap-0.5 flex-wrap justify-center">
+          {'01001000010001010100'.split('').map((b, i) => (
+            <span key={i} className={`w-5 h-5 flex items-center justify-center border border-black rounded text-xs font-black ${[3,9,15].includes(i) ? 'bg-red-400 text-white' : 'bg-white'}`}>
+              {[3,9,15].includes(i) ? (b==='0'?'1':'0') : b}
+            </span>
+          ))}
+        </div>
+        <div className="bg-red-300 border-2 border-black px-3 py-1 rounded font-black text-xs">3 errors injected at positions 3, 9, 15</div>
+      </div>
+    ),
+    explanation: "Exactly t random bit errors are injected into the codeword. This is part of encryption — only the private key can remove them.",
+  },
+  {
+    title: 'Goppa Decoder',
+    visual: (
+      <div className="flex flex-col items-center gap-2">
+        <div className="flex gap-0.5 flex-wrap justify-center">
+          {'01001000010001010100'.split('').map((b, i) => (
+            <span key={i} className={`w-5 h-5 flex items-center justify-center border border-black rounded text-xs font-black ${[3,9,15].includes(i) ? 'bg-green-300' : 'bg-white'}`}>{b}</span>
+          ))}
+        </div>
+        <div className="font-black text-xl">↓</div>
+        <div className="bg-rose-300 border-4 border-black px-4 py-3 rounded-xl font-black text-sm text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">Goppa Decoder<br/><span className="text-xs">(private key only)</span></div>
+        <div className="bg-green-200 border-2 border-black px-3 py-1 rounded font-black text-xs">✓ All 3 errors corrected</div>
+      </div>
+    ),
+    explanation: "The private key reveals the Goppa code structure, allowing the decoder to locate and correct all t errors — impossible without the private key.",
+  },
+  {
+    title: 'Recover Message',
+    visual: (
+      <div className="flex flex-col items-center gap-3">
+        <div className="bg-white border-2 border-black px-3 py-2 rounded-xl font-mono text-xs">01001000 01000101 01001100 01010000</div>
+        <div className="font-black text-xl">↓ strip parity bits</div>
+        <div className="bg-green-300 border-4 border-black font-black text-3xl px-6 py-3 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">HELP</div>
+        <div className="bg-green-400 border-2 border-black px-3 py-1 rounded font-black text-xs">✓ Message recovered</div>
+      </div>
+    ),
+    explanation: "Strip the redundancy bits and convert back to text — HELP is perfectly recovered despite the injected errors. No quantum computer can break this.",
+  },
+];
 
 interface Props { activeTab: 'learn' | 'play' }
 
 export function McElieceLearn() {
   return (
     <div className="space-y-6">
+      <StepPlayer steps={MCELIECE_STEPS} accentColor="bg-rose-300" />
       <div className="bg-rose-300 border-4 border-black p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl">
         <h3 className="text-xl font-black uppercase mb-2">McEliece Cryptosystem</h3>
         <p className="font-bold text-sm leading-relaxed">
