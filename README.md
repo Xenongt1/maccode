@@ -1,70 +1,269 @@
-# Getting Started with Create React App
+# Classical Cipher Step-By-Step Visualizer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An interactive web application that visually demonstrates, step-by-step, how classical ciphers work. Built with React, TypeScript, and Tailwind CSS.
 
-## Available Scripts
+![Classical Cipher Visualizer](https://img.shields.io/badge/React-18.2-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue) ![Tests](https://img.shields.io/badge/tests-passing-green)
 
-In the project directory, you can run:
+## 🎯 Features
 
-### `npm start`
+### Implemented Ciphers
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+1. **Caesar Cipher** - Simple shift cipher with circular wheel visualization
+2. **Affine Cipher** - Linear transformation with ax+b formula
+3. **Atbash Cipher** - Reverse alphabet substitution
+4. **Vigenère Cipher** - Polyalphabetic substitution with repeating key
+5. **Playfair Cipher** - 5×5 grid digraph encryption with visual grid
+6. **Rail Fence Cipher** - Transposition zigzag pattern
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Core Features
 
-### `npm test`
+- **Step-by-Step Visualization**: Watch each encryption/decryption operation unfold frame by frame
+- **Animation Controls**: Play/Pause, step forward/backward, adjust speed (0.25x - 4x)
+- **Frequency Analysis**: Live chart comparing plaintext vs ciphertext letter frequencies
+- **Math Details**: Toggle to show/hide mathematical calculations for each step
+- **Test Cases**: Built-in test vectors for each cipher
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Accessibility**: Keyboard controls and ARIA labels for screen readers
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Visualization Model
 
-### `npm run build`
+Every cipher operation produces a **Frame** object:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```typescript
+interface Frame {
+  id: string;
+  label: string;
+  operationType: string;
+  highlightIndices: number[];
+  intermediateText: string;
+  meta?: {
+    calculation?: string;
+    grid?: string[][];
+    matrix?: number[][];
+    position?: { x: number; y: number };
+  };
+}
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Options
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- **Preserve Case**: Maintain original letter casing
+- **Keep Non-Letters**: Preserve spaces and punctuation
+- **Map J→I**: Playfair option to map J to I
+- **Padding Character**: Character used for padding (default 'X')
+- **Verbosity**: Beginner (fewer frames) or Detailed (all steps)
+- **Show Math**: Display mathematical operations
 
-### `npm run eject`
+## 🚀 Getting Started
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Prerequisites
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Node.js 18+ and npm
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Installation
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+# Install dependencies
+npm install
 
-## Learn More
+# Run development server
+npm run dev
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+# Run tests
+npm test
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# Build for production
+npm run build
 
-### Code Splitting
+# Preview production build
+npm run preview
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Usage
 
-### Analyzing the Bundle Size
+1. **Select a Cipher** from the left panel
+2. **Enter plaintext** or load a test case
+3. **Configure key(s)** specific to the cipher
+4. **Click Encrypt/Decrypt** to generate visualization
+5. **Use animation controls** to step through the process
+6. **View frequency analysis** to understand the cipher's effectiveness
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 📚 Cipher Algorithms
 
-### Making a Progressive Web App
+### Caesar Cipher
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- **Mapping**: A=0...Z=25
+- **Encryption**: `E(x) = (x + shift) mod 26`
+- **Decryption**: `D(x) = (x - shift) mod 26`
+- **Example**: HELLO + shift(3) → KHOOR
 
-### Advanced Configuration
+### Affine Cipher
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- **Encryption**: `E(x) = (ax + b) mod 26`
+- **Decryption**: `D(y) = a⁻¹(y - b) mod 26`
+- **Constraint**: `gcd(a, 26) = 1`
+- **Example**: HELLO + a(5),b(8) → RCLLA
 
-### Deployment
+### Atbash Cipher
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- **Mapping**: `E(x) = 25 - x`
+- **Self-inverse**: Encryption = Decryption
+- **Example**: HELLO → SVOOL
 
-### `npm run build` fails to minify
+### Vigenère Cipher
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **Encryption**: `E(x,k) = (x + k) mod 26`
+- **Key repeats**: Polyalphabetic substitution
+- **Example**: HELLO + KEY → RIJVS
+
+### Playfair Cipher
+
+1. Create 5×5 grid from key
+2. Pair letters into digraphs
+3. Apply rules:
+   - Same row: shift right
+   - Same column: shift down
+   - Rectangle: swap columns
+- **Example**: HELLO + MONARCHY → CFSUPM
+
+### Rail Fence Cipher
+
+1. Write text in zigzag pattern across N rails
+2. Read rails sequentially top to bottom
+- **Example**: HELLO + 3 rails → HOELL
+
+## 🧪 Testing
+
+The project includes comprehensive unit tests for all ciphers:
+
+```bash
+npm test
+```
+
+Test coverage includes:
+- ✅ Encryption/Decryption correctness
+- ✅ Frame generation
+- ✅ Key validation
+- ✅ Edge cases
+- ✅ Options handling
+
+### Sample Test Vectors
+
+| Cipher | Plaintext | Key | Expected Output |
+|--------|-----------|-----|-----------------|
+| Caesar | HELLO | 3 | KHOOR |
+| Affine | HELLO | a=5, b=8 | RCLLA |
+| Atbash | HELLO | - | SVOOL |
+| Vigenère | HELLO | KEY | RIJVS |
+| Playfair | HELLO | MONARCHY | CFSUPM |
+| Rail Fence | HELLO | 3 | HOELL |
+
+## 🎨 Design
+
+The UI is inspired by modern educational platforms with:
+- **Gradient backgrounds**: Purple and pink tones
+- **Card-based layout**: Clean, organized sections
+- **Smooth animations**: Framer Motion powered transitions
+- **Dark mode support**: Automatic theme detection
+- **Accessible colors**: WCAG compliant contrast ratios
+
+## 🔒 Security Warning
+
+**⚠️ Educational purposes only.** Classical ciphers are not secure for real-world use. They are easily broken with frequency analysis and modern cryptanalysis techniques. Never use them to protect sensitive information.
+
+## 🏗️ Project Structure
+
+```
+/workspace
+├── src/
+│   ├── ciphers/          # Cipher implementations
+│   │   ├── caesar.ts
+│   │   ├── affine.ts
+│   │   ├── atbash.ts
+│   │   ├── vigenere.ts
+│   │   ├── playfair.ts
+│   │   └── railfence.ts
+│   ├── components/       # React components
+│   │   ├── CipherSelector.tsx
+│   │   ├── CipherInput.tsx
+│   │   ├── FrameVisualization.tsx
+│   │   ├── AnimationControls.tsx
+│   │   └── FrequencyAnalysis.tsx
+│   ├── types/           # TypeScript interfaces
+│   ├── utils/           # Helper functions
+│   ├── __tests__/       # Test files
+│   └── App.tsx          # Main application
+├── package.json
+├── tsconfig.json
+├── tailwind.config.js
+├── vite.config.ts
+└── README.md
+```
+
+## 📝 Frame Generation Algorithm
+
+Each cipher follows this pattern:
+
+1. **Initialization**: Create init frame with cipher setup
+2. **Character Processing**: For each character:
+   - Create frame showing the operation
+   - Include highlight indices
+   - Add meta information (calculation, grid, etc.)
+3. **Completion**: Create final frame with complete output
+
+Example Caesar cipher frame:
+
+```typescript
+{
+  id: 'char-0',
+  label: "Encrypt 'H' → 'K'",
+  operationType: 'encrypt',
+  highlightIndices: [0],
+  intermediateText: 'K',
+  meta: {
+    calculation: 'H → 7 → (7 + 3) mod 26 = 10 → K'
+  }
+}
+```
+
+## 🛠️ Technology Stack
+
+- **Frontend**: React 18, TypeScript 5
+- **Styling**: Tailwind CSS 3
+- **Animation**: Framer Motion
+- **Charts**: Recharts
+- **Icons**: Lucide React
+- **Build Tool**: Vite
+- **Testing**: Vitest
+
+## 📈 Future Enhancements
+
+Additional ciphers to implement:
+- Beaufort Cipher
+- Autokey Cipher
+- Hill Cipher (with matrix visualization)
+- One-Time Pad (OTP)
+- Columnar Transposition
+- Scytale
+- ADFGX/ADFGVX
+- Bacon's Cipher
+- Homophonic Substitution
+
+Additional features:
+- Export animation as GIF/WebM
+- Teacher mode with auto-generated exercises
+- Cryptanalysis tools
+- Historical context for each cipher
+- Multi-language support
+
+## 📄 License
+
+This project is for educational purposes. Feel free to use and modify.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+---
+
+**Built with ❤️ for cryptography education**
