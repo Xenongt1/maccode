@@ -8,6 +8,7 @@ import FrequencyAnalysis from './components/FrequencyAnalysis';
 import CryptoHistoryCarousel from './components/CryptoHistoryCarousel';
 import HeroLanding from './components/HeroLanding';
 import ModernSection from './components/ModernSection';
+import RoadmapPage from './components/RoadmapPage';
 import { CipherType, CipherOptions, Frame } from './types';
 import { Download, Copy, Check, PersonStanding, Menu, X, ChevronRight } from 'lucide-react';
 import { exportFramesAsJSON, copyToClipboard, exportAsText } from './utils/export';
@@ -32,7 +33,7 @@ function App() {
   const [plaintext, setPlaintext] = useState('');
   const [ciphertext, setCiphertext] = useState('');
   const [copied, setCopied] = useState(false);
-  const [currentSection, setCurrentSection] = useState<'home' | 'visualizer' | 'modern' | 'about'>('home');
+  const [currentSection, setCurrentSection] = useState<'home' | 'visualizer' | 'modern' | 'roadmap' | 'about'>('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleCopyOutput = async () => {
@@ -105,6 +106,17 @@ function App() {
                 }`}
               >
                 Modern Crypto
+              </button>
+
+              <button
+                onClick={() => setCurrentSection('roadmap')}
+                className={`px-4 lg:px-6 py-2 lg:py-3 font-black uppercase text-xs lg:text-sm border-4 border-black rounded-xl transition-all transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none ${
+                  currentSection === 'roadmap'
+                    ? 'bg-black text-yellow-300 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                    : 'bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                }`}
+              >
+                Roadmap
               </button>
 
               <button
@@ -181,6 +193,20 @@ function App() {
                   }`}
                 >
                   Modern Crypto
+                </button>
+
+                <button
+                  onClick={() => {
+                    setCurrentSection('roadmap');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full px-4 py-3 font-black uppercase text-sm border-4 border-black rounded-xl transition-all ${
+                    currentSection === 'roadmap'
+                      ? 'bg-black text-yellow-300 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                      : 'bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                  }`}
+                >
+                  Roadmap
                 </button>
 
                 <button
@@ -289,9 +315,9 @@ function App() {
       <main className="relative z-10">
         {currentSection === 'home' && (
           <>
-            <HeroLanding 
+            <HeroLanding
               onGetStarted={() => setCurrentSection('visualizer')}
-              onLearnMore={() => setCurrentSection('about')}
+              onLearnMore={() => setCurrentSection('roadmap')}
             />
             <CryptoHistoryCarousel />
           </>
@@ -347,6 +373,10 @@ function App() {
         )}
 
         {currentSection === 'modern' && <ModernSection />}
+
+        {currentSection === 'roadmap' && (
+          <RoadmapPage onNavigate={(section) => setCurrentSection(section)} />
+        )}
 
         {currentSection === 'about' && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
