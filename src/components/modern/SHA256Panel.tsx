@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Zap } from 'lucide-react';
 import StepPlayer, { CipherStep } from './StepPlayer';
 
 const CAT_HASH = '3c0a7167b2c66c15a2397f6ba';
@@ -143,7 +144,7 @@ export function SHA256Learn() {
         {[
           { name: 'Deterministic', desc: 'Same input always produces the same hash.', icon: '=' },
           { name: 'One-Way', desc: 'Given H(x), it is computationally infeasible to find x.', icon: '→' },
-          { name: 'Avalanche Effect', desc: 'Changing one bit in input changes ~50% of output bits.', icon: '💥' },
+          { name: 'Avalanche Effect', desc: 'Changing one bit in input changes ~50% of output bits.', icon: <Zap size={22} /> },
           { name: 'Collision Resistant', desc: 'Infeasible to find two different inputs with same hash.', icon: '≠' },
         ].map(p => (
           <div key={p.name} className="bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl">
@@ -200,7 +201,7 @@ export function SHA256Learn() {
                   <td className="border-2 border-black p-2 text-xs">{out}</td>
                   <td className="border-2 border-black p-2 text-xs">{sec}</td>
                   <td className="border-2 border-black p-2 text-xs">
-                    {sec === 'Broken' ? '❌ Never use' : sec === 'Deprecated' ? '⚠ Avoid' : '✓ OK'}
+                    {sec === 'Broken' ? '✗ Never use' : sec === 'Deprecated' ? '⚠ Avoid' : '✓ OK'}
                   </td>
                 </tr>
               ))}

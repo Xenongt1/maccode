@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Lock } from 'lucide-react';
 import StepPlayer, { CipherStep } from './StepPlayer';
 
 const ECDH_STEPS: CipherStep[] = [
@@ -31,7 +32,7 @@ const ECDH_STEPS: CipherStep[] = [
           <circle cx="1.8" cy="-1.3" r="0.15" fill="#06b6d4" /><text x="2.0" y="-1.25" fontSize="0.25" fontWeight="bold" fill="#06b6d4">aG</text>
         </svg>
         <div className="flex gap-2">
-          <div className="bg-cyan-300 border-2 border-black px-2 py-1 rounded font-black text-xs">🔒 secret a</div>
+          <div className="bg-cyan-300 border-2 border-black px-2 py-1 rounded font-black text-xs flex items-center gap-1"><Lock size={10} /> secret a</div>
           <div className="bg-cyan-200 border-2 border-black px-2 py-1 rounded font-black text-xs">→ Public aG</div>
         </div>
       </div>
@@ -49,7 +50,7 @@ const ECDH_STEPS: CipherStep[] = [
           <circle cx="2.3" cy="-0.7" r="0.15" fill="#ec4899" /><text x="2.5" y="-0.65" fontSize="0.25" fontWeight="bold" fill="#ec4899">bG</text>
         </svg>
         <div className="flex gap-2">
-          <div className="bg-pink-300 border-2 border-black px-2 py-1 rounded font-black text-xs">🔒 secret b</div>
+          <div className="bg-pink-300 border-2 border-black px-2 py-1 rounded font-black text-xs flex items-center gap-1"><Lock size={10} /> secret b</div>
           <div className="bg-pink-200 border-2 border-black px-2 py-1 rounded font-black text-xs">→ Public bG</div>
         </div>
       </div>

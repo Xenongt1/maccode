@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Lock } from 'lucide-react';
 import StepPlayer, { CipherStep } from './StepPlayer';
 
 const KYBER_STEPS: CipherStep[] = [
@@ -10,7 +11,7 @@ const KYBER_STEPS: CipherStep[] = [
         <div className="bg-black text-black border-4 border-black px-6 py-4 rounded-2xl font-black text-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] select-none">
           s = [2, -1]
         </div>
-        <div className="bg-black text-yellow-300 px-3 py-1 rounded font-black text-xs">🔒 never revealed</div>
+        <div className="bg-black text-yellow-300 px-3 py-1 rounded font-black text-xs flex items-center gap-1"><Lock size={10} /> never revealed</div>
         <div className="text-xs font-bold text-black/50">Coefficients are tiny: -1, 0, or 1</div>
       </div>
     ),

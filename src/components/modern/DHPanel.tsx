@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Lock } from 'lucide-react';
 import StepPlayer, { CipherStep } from './StepPlayer';
 
 const DH_STEPS: CipherStep[] = [
@@ -25,7 +26,7 @@ const DH_STEPS: CipherStep[] = [
     visual: (
       <div className="flex items-center gap-3 flex-wrap justify-center">
         <div className="bg-cyan-300 border-4 border-black px-4 py-3 rounded-2xl text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <div className="text-xs font-black">🔒 Secret</div>
+          <div className="text-xs font-black flex items-center gap-1 justify-center"><Lock size={10} /> Secret</div>
           <div className="font-black text-2xl">a = 6</div>
         </div>
         <div className="font-black text-xl">→</div>
@@ -41,7 +42,7 @@ const DH_STEPS: CipherStep[] = [
     visual: (
       <div className="flex items-center gap-3 flex-wrap justify-center">
         <div className="bg-pink-300 border-4 border-black px-4 py-3 rounded-2xl text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <div className="text-xs font-black">🔒 Secret</div>
+          <div className="text-xs font-black flex items-center gap-1 justify-center"><Lock size={10} /> Secret</div>
           <div className="font-black text-2xl">b = 15</div>
         </div>
         <div className="font-black text-xl">→</div>

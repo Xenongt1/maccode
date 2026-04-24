@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Shuffle, ArrowLeftRight, X, Hash } from 'lucide-react';
 import StepPlayer, { CipherStep } from './StepPlayer';
 
 const STATE_ORIG = [['19','A0','9A','E9'],['3D','F4','C6','F8'],['E3','E2','8D','48'],['BE','2B','2A','08']];
@@ -155,13 +156,13 @@ export function AESLearn() {
 
       <div className="grid md:grid-cols-2 gap-4">
         {[
-          { op: 'SubBytes', icon: '🔀', desc: 'Each byte is replaced by a non-linear S-box lookup. Prevents algebraic attacks.' },
-          { op: 'ShiftRows', icon: '↔️', desc: 'Rows of the 4×4 state matrix are cyclically shifted by 0–3 positions.' },
-          { op: 'MixColumns', icon: '✖️', desc: 'Each column is multiplied over GF(2⁸). One byte in → all 4 bytes out change.' },
-          { op: 'AddRoundKey', icon: '⊕', desc: 'State is XOR\'d with the round key — the only step that involves the secret key.' },
+          { op: 'SubBytes', icon: <Shuffle size={22} />, desc: 'Each byte is replaced by a non-linear S-box lookup. Prevents algebraic attacks.' },
+          { op: 'ShiftRows', icon: <ArrowLeftRight size={22} />, desc: 'Rows of the 4×4 state matrix are cyclically shifted by 0–3 positions.' },
+          { op: 'MixColumns', icon: <X size={22} />, desc: 'Each column is multiplied over GF(2⁸). One byte in → all 4 bytes out change.' },
+          { op: 'AddRoundKey', icon: <Hash size={22} />, desc: 'State is XOR\'d with the round key — the only step that involves the secret key.' },
         ].map(op => (
           <div key={op.op} className="bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl">
-            <div className="text-2xl mb-1">{op.icon}</div>
+            <div className="mb-1">{op.icon}</div>
             <div className="font-black uppercase mb-1">{op.op}</div>
             <p className="text-sm font-bold text-black/70">{op.desc}</p>
           </div>

@@ -9,7 +9,7 @@ import CryptoHistoryCarousel from './components/CryptoHistoryCarousel';
 import HeroLanding from './components/HeroLanding';
 import ModernSection from './components/ModernSection';
 import { CipherType, CipherOptions, Frame } from './types';
-import { Download, Copy, Check, PersonStanding, Menu, X } from 'lucide-react';
+import { Download, Copy, Check, PersonStanding, Menu, X, ChevronRight } from 'lucide-react';
 import { exportFramesAsJSON, copyToClipboard, exportAsText } from './utils/export';
 
 const defaultOptions: CipherOptions = {
@@ -69,7 +69,7 @@ function App() {
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Brand Name Only */}
             <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black tracking-tight text-black uppercase">
-              CLASSCIPHER
+              CRYPTOLEARN
             </h1>
 
             {/* Desktop Navigation Links */}
@@ -356,12 +356,12 @@ function App() {
               className="bg-white border-4 sm:border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] p-6 sm:p-8 lg:p-12 rounded-2xl sm:rounded-3xl"
             >
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-black mb-6 sm:mb-8 uppercase">
-              About ClassCipher
+              About CryptoLearn
             </h2>
-            
+
             <div className="space-y-6 sm:space-y-8">
               <p className="text-lg sm:text-xl lg:text-2xl text-black font-bold leading-relaxed">
-                This interactive educational tool helps you understand classical encryption algorithms through step-by-step visualizations.
+                An interactive educational platform covering the full spectrum of cryptography — from ancient classical ciphers to cutting-edge post-quantum and quantum cryptography — through animated visualizations and hands-on playgrounds.
               </p>
 
               <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -372,31 +372,31 @@ function App() {
                   </h3>
                   <ul className="space-y-2 sm:space-y-3 text-sm sm:text-base font-bold">
                     <li className="flex items-start gap-3">
-                      <span className="text-black text-xl mt-0.5">→</span>
+                      <ChevronRight size={18} className="mt-0.5 shrink-0" />
                       <span>8 classical cipher visualizers with frame-by-frame playback</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-black text-xl mt-0.5">→</span>
+                      <ChevronRight size={18} className="mt-0.5 shrink-0" />
                       <span>12 modern crypto schemes with animated step-through explanations</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-black text-xl mt-0.5">→</span>
+                      <ChevronRight size={18} className="mt-0.5 shrink-0" />
                       <span>Real AES-256-GCM, RSA-2048, ECDH P-256 & SHA-256 via Web Crypto API</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-black text-xl mt-0.5">→</span>
+                      <ChevronRight size={18} className="mt-0.5 shrink-0" />
                       <span>Post-quantum cryptography: ML-KEM (Kyber) and McEliece explained</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-black text-xl mt-0.5">→</span>
+                      <ChevronRight size={18} className="mt-0.5 shrink-0" />
                       <span>BB84 quantum key distribution simulation with Eve eavesdropping toggle</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-black text-xl mt-0.5">→</span>
+                      <ChevronRight size={18} className="mt-0.5 shrink-0" />
                       <span>Authentic Enigma machine simulation with rotor stepping & plugboard</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-black text-xl mt-0.5">→</span>
+                      <ChevronRight size={18} className="mt-0.5 shrink-0" />
                       <span>Frequency analysis, export (JSON/text/clipboard), keyboard controls</span>
                     </li>
                   </ul>
@@ -409,27 +409,27 @@ function App() {
                   </h3>
                   <ul className="space-y-2 sm:space-y-3 text-sm sm:text-base font-bold">
                     <li className="flex items-start gap-3">
-                      <span className="text-black text-xl mt-0.5">→</span>
+                      <ChevronRight size={18} className="mt-0.5 shrink-0" />
                       <span>React 18 with TypeScript</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-black text-xl mt-0.5">→</span>
+                      <ChevronRight size={18} className="mt-0.5 shrink-0" />
                       <span>Vite for fast development</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-black text-xl mt-0.5">→</span>
+                      <ChevronRight size={18} className="mt-0.5 shrink-0" />
                       <span>Tailwind CSS for styling</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-black text-xl mt-0.5">→</span>
+                      <ChevronRight size={18} className="mt-0.5 shrink-0" />
                       <span>Framer Motion for animations</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-black text-xl mt-0.5">→</span>
+                      <ChevronRight size={18} className="mt-0.5 shrink-0" />
                       <span>Recharts for data visualization</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-black text-xl mt-0.5">→</span>
+                      <ChevronRight size={18} className="mt-0.5 shrink-0" />
                       <span>Vitest for testing</span>
                     </li>
                   </ul>
@@ -543,10 +543,10 @@ function App() {
                 <div className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-300 border-4 border-yellow-300 flex items-center justify-center">
                   <span className="text-lg sm:text-2xl"></span>
                 </div>
-                <span className="font-black text-lg sm:text-xl lg:text-2xl text-yellow-300 uppercase">CLASSCIPHER</span>
+                <span className="font-black text-lg sm:text-xl lg:text-2xl text-yellow-300 uppercase">CRYPTOLEARN</span>
               </div>
               <p className="text-white font-bold text-xs sm:text-sm">
-                Learn classical cryptography through interactive visualizations and step-by-step demonstrations.
+                Explore cryptography from classical ciphers to post-quantum algorithms through interactive visualizations and live playgrounds.
               </p>
             </div>
             <div>
@@ -565,7 +565,7 @@ function App() {
             </div>
           </div>
           <div className="pt-6 sm:pt-8 border-t-2 sm:border-t-4 border-yellow-300 text-center">
-            <p className="text-white font-black uppercase text-xs sm:text-sm">© 2025 ClassCipher. Educational purposes only.</p>
+            <p className="text-white font-black uppercase text-xs sm:text-sm">© 2025 CryptoLearn. Educational purposes only.</p>
           </div>
         </div>
       </footer>
